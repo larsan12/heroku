@@ -1,0 +1,103 @@
+<!-- <!DOCTYPE html> -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>My Treeview - CSS & JQuery</title>
+	<link href="Style.css" rel="stylesheet" />
+</head>
+<body>
+	<div class="TreeContainer" >
+		<div class="ParentPlace">
+			<span>Root</span>
+		</div>
+		<br><br>
+		<ul class="tree">
+			<li>
+				<a> Node1 </a>
+				<ul>
+					<li>
+						<a>Node2</a>
+						<ul>
+							<li><a>Node3</a></li>
+							<li><a>Node4</a></li>
+							<li>
+								<a>Node5</a>
+								<ul>
+									<li><a>Node6</a></li>
+									<li><a>Node7</a></li>
+									<li><a>Node8</a></li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li><a>Node9</a></li>
+			<li>
+				<a>Node10</a>
+				<ul>
+					<li><a>Node11</a></li>
+					<li><a>Node12</a></li>
+					<li>
+						<a>Node13</a>
+						<ul>
+							<li><a>Node14</a>
+								<ul>
+									<li><a>Node15</a>
+										<ul>
+											<li><a>Node16</a></li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+							<li><a>Node17</a></li>
+							<li><a>Node18</a></li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>
+				<a>Node19</a>
+				<ul>
+					<li><a>Node22</a></li>
+					<li><a>Node20</a></li>
+					<li><a>Node21</a></li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+
+<script src="jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+	function LoadChildren(ctrl) {
+		if ($(ctrl).next('a').next('ul').is(':visible')) {
+			$(ctrl).next('a').next('ul').hide('slow');
+			$(ctrl).attr('src', '/Images/ChildNode.png');
+		}
+		else {
+			$(ctrl).next('a').next('ul').show('slow');
+			$(ctrl).attr('src', 'Images/ChildNode.png');
+		}
+	}
+        
+
+	function NodeSelection(ctrl) {
+		$('ul.tree li').find('a').each(function () { $(this).removeClass(); })
+		$(ctrl).addClass("selected");
+	}
+
+	$(document).ready(function () {
+		$('ul.tree li').each(function () {
+			$(this).children('img').click(function () {
+				LoadChildren(this);
+			});
+		});
+
+		$('ul.tree li a').click(function (e) {
+			$('ul.tree li').find('a').each(function () { $(this).removeClass(); })
+
+			$(this).addClass("selected");
+		});
+	});
+</script>
+</body>
+</html>
