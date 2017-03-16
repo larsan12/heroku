@@ -4,98 +4,81 @@
   <meta name="description" content="Task">
   <meta name="viewport" content="initial-scale=1.0, width=device-width">
   <title>Task</title>
-  <script type="text/javascript">
-
-  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"> </script>
   <link href="/style" rel="stylesheet" />
 </head>
 <body>
   <div class="main">
-  
-    <div class="TreeContainer right" >
-      <div class="ParentPlace">
-        <span>Root</span>
-      </div>
-      <br><br>
+
+    <div class="TreeContainer left" >
       <ul class="tree">
       </ul>
     </div>
 
+    <input id="move" onclick="move()" type="button" value="<<<">
+
     <div class="TreeContainer right" >
-      <div class="ParentPlace">
-        <span>Root</span>
-      </div>
-      <br><br>
       <ul class="tree">
-        <li>
-          <a> Node1 </a>
-          <ul>
-            <li>
-              <a>Node2</a>
-              <ul>
-                <li><a>Node3</a></li>
-                <li><a>Node4</a></li>
-                <li>
-                  <a>Node5</a>
-                  <ul>
-                    <li><a>Node6</a></li>
-                    <li><a>Node7</a></li>
-                    <li><a>Node8</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li><a>Node9</a></li>
-        <li>
-          <a>Node10</a>
-          <ul>
-            <li><a>Node11</a></li>
-            <li><a>Node12</a></li>
-            <li>
-              <a>Node13</a>
-              <ul>
-                <li><a>Node14</a>
-                  <ul>
-                    <li><a>Node15</a>
-                      <ul>
-                        <li><a>Node16</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
-                <li><a>Node17</a></li>
-                <li><a>Node18</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li>
-          <a>Node19</a>
-          <ul>
-            <li><a>Node22</a></li>
-            <li><a>Node20</a></li>
-            <li><a>Node21</a></li>
-          </ul>
-        </li>
       </ul>
     </div>
+
+    <input id="add" onclick="add()" type="button" value="+">
+    <input id="delete" onclick="delete()" type="button" value="-">
+    <input id="rename" onclick="rename()" type="button" value="a">
+    <input id="apply" onclick="apply()" type="button" value="apply">
+    <input id="reset" onclick="reset()" type="button" value="reset">
   </div>
+  
 
-  <script src="jquery-1.10.2.min.js"></script>
   <script type="text/javascript">
-    function LoadChildren(ctrl) {
-      if ($(ctrl).next('a').next('ul').is(':visible')) {
-        $(ctrl).next('a').next('ul').hide('slow');
-        $(ctrl).attr('src', '/Images/ChildNode.png');
-      }
-      else {
-        $(ctrl).next('a').next('ul').show('slow');
-        $(ctrl).attr('src', 'Images/ChildNode.png');
+    var session;
+    var tree;
+    var cash;
+
+    function add() {
+      $.ajax({
+        type: "get",
+        url: '/test',
+        success: function(message){
+          alert(message);
+        }
+      });
+    };
+
+    function drawNode(node) {
+      if (node.parent) {
+        var ctrl = $("#" + node.parent);
+        if (ctrl.length) {
+          if (ctrl.children("ul").length) {
+            var nodeStr = "<li id=" + node.id +">";
+            nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
+            node.value + '</a>' + '</li>';
+            ctrl.children("ul").append(nodeStr);
+          } else {
+            var nodeStr = "<ul> <li id=" + node.id +">";
+            nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
+            node.value + '</a>' + '</li> </ul>';
+            ctrl.append(nodeStr);
+          }
+        }
+      } else {
+        var nodeStr = "<li id=" + node.id +">";
+        nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
+        node.value + '</a>' + '</li>';
+        $(".right ul.tree").append(nodeStr);
       }
     }
 
+    function drawTree(tree){
+      if (tree.branches.length) {
+        tree.branches.forEach(node => {
+          drawNode(node);
+        });
+        tree.branches.forEach(node => {
+          drawTree(node);
+        });
+      }
+    }
 
     function NodeSelection(ctrl) {
       $('ul.tree li').find('a').each(function () { $(this).removeClass(); })
@@ -103,10 +86,17 @@
     }
 
     $(document).ready(function () {
-      $('ul.tree li').each(function () {
-        $(this).children('img').click(function () {
-          LoadChildren(this);
-        });
+
+      $.ajax({
+        type: "get",
+        dataType: 'json',
+        url: '/session',
+        success: function(res){
+          session = res.id;
+          tree = res.tree;
+          drawNode(tree);
+          drawTree(tree);
+        }
       });
 
       $('ul.tree li a').click(function (e) {
