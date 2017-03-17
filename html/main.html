@@ -52,6 +52,7 @@
         success: function(res){
           clear(".left");
           cash = res.nodesCash;
+          cash.forEach(n=> lockNode(n.id));
           drawAll(cash, ".left");
         }
       });
@@ -107,6 +108,13 @@
       } else {
         $(ctrl).addClass("selected");
       }
+    }
+
+    function lockNode(id) {
+      var ctrl = $(".right " + "#" + id + " a").first();
+      $(ctrl).removeClass();
+      $(ctrl).addClass("locked");
+      $(ctrl).attr('onclick','').unbind('click');
     }
 
     $(document).ready(function () {

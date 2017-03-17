@@ -28,27 +28,48 @@ class Node {
 
 class Cash {
 	constructor() {
-		this.nodes = [];
+		this.array = [];
+		this.nodes = []
 	}
 
 	checkDependencies() {
-		//TODO
-	}
+		this.nodes = this.array.slice();
+		this.nodes.sort(function(a, b) {
+			var aId = a.id;
+			var bId= b.id;
+			return parseInt(bId) - parseInt(aId);
+		});
+		for (var i = 0; i < this.nodes.length; i++) {
+			for (var j = i + 1; j < this.nodes.length; j++) {
+				if (this.nodes[i]._parent == this.nodes[j]._parent) {
+					this.nodes[i].parent = this.nodes[i]._parent;
+					this.nodes[j].branches = [];
+					this.nodes[j].branches.push(this.nodes[i]);
+					this.nodes[i] = undefined;
+				}
+			}
+		}
+		this.nodes = this.nodes.filter(n => n);		
+	};
 
 	addNodes(nodes) {
 		nodes.forEach(node => {
-			if (!this.nodes.find(n => n.id == node.id))
-				this.nodes.push(node);
-			this.nodes.sort(function(a, b) {
-				var aId = a.id;
-				var bId= b.id;
-				var maxLength = Math.max(aId.length, bId.length);
-				aId = aId + "0".repeat(maxLength - aId.length);
-				bId = bId + "0".repeat(maxLength - bId.length);
-				return parseInt(aId) - parseInt(bId);
-
-			})
+			if (!this.array.find(n => n.id == node.id))
+				this.array.push(node);
 		});
+		this.checkDependencies();
+		this.sortNodes();
+	};
+
+	sortNodes() {
+		this.nodes.sort(function(a, b) {
+			var aId = a.id;
+			var bId= b.id;
+			var maxLength = Math.max(aId.length, bId.length);
+			aId = aId + "0".repeat(maxLength - aId.length);
+			bId = bId + "0".repeat(maxLength - bId.length);
+			return parseInt(aId) - parseInt(bId);
+		})
 	}
 }
 
