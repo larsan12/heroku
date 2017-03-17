@@ -1,19 +1,28 @@
 "use strict"
 var randomID = require("random-id");
 
-var sessions = [];
+var sessions = {};
 
 //элем
 class Node {
-	constructor(value) {
+	constructor(value, db) {
 		this.value = value;
 		this.branches = [];
-		this.id = randomID(10,"0");
+
+		db.array.push(this);
+		this.id = "0";
+		this.numberOfChildren = 0;
 	}
 
 	addBranch(node) {
 		this.branches.push(node);
 		node.parent = this.id;
+		// преобразуем id к виду 00 00 00 где каждая пара цифр обозначает занимаемое место в i-й по глубине ветке
+
+		if ((this.numberOfChildren + "").length == 1)
+			node.id = this.id + "0" + (++this.numberOfChildren);
+		else
+			node.id = this.id + "" + (++this.numberOfChildren);
 	}
 }
 
@@ -25,68 +34,151 @@ class Cash {
 	checkDependencies() {
 		//TODO
 	}
-}
 
-class Db {
-	constructor(){
-		this.parentNode = new Node("Root");
-		defaultTree(this.parentNode);
-		this.cash = new Cash();
+	addNodes(nodes) {
+		nodes.forEach(node => {
+			if (!this.nodes.find(n => n.id == node.id))
+				this.nodes.push(node);
+			this.nodes.sort(function(a, b) {
+				var aId = a.id;
+				var bId= b.id;
+				var maxLength = Math.max(aId.length, bId.length);
+				aId = aId + "0".repeat(maxLength - aId.length);
+				bId = bId + "0".repeat(maxLength - bId.length);
+				return parseInt(aId) - parseInt(bId);
+
+			})
+		});
 	}
 }
 
-function Session() {
-	this.id = randomID(20,"a");
-	this.db = new Db();
-	this.cash = this.db.cash;
+class Db {
+	constructor() {
+		this.array = [];
+		this.deepestLevel = 0;
+		this.parentNode = new Node("Root", this);
+	}
+}
+
+class Session {
+	constructor() {
+		this.id = randomID(20,"a");
+		this.db = new Db();
+		this.cash = new Cash();
+		defaultTree(this.db.parentNode, this.db);
+	}
+
+	move(req, res) {
+		if (req.body.nodes && req.body.nodes.length) {
+			this.cash.addNodes(req.body.nodes);
+		};
+		res.json({nodesCash:this.cash.nodes});
+	};
+
+	addNode(req, res) {
+		
+	};
+
+	deleteNode(req, res) {
+		
+	};
+
+	renameNode(req, res) {
+		
+	};
+
+	apply(req, res) {
+		
+	};
+
+	reset(req, res) {
+		
+	};
 }
 
 
 function getSession(req, res) {
-	// TODO check session
+	// TODO fire session
 	var session = new Session();
-	sessions.push(session);
+	sessions[session.id]=session;
+	var copyArray = session.db.array.map(node => {
+		var copyNode = Object.assign({}, node);
+		delete copyNode.branches;
+		copyNode._parent = copyNode.parent;
+		delete copyNode.parent;
+		return copyNode;
+	});
 	res.json({
 		id: session.id,
-		tree: session.db.parentNode
+		tree: session.db.parentNode,
+		array: copyArray
 	});
-	/*res.send(JSON.stringify({
-		id: session.id,
-		tree: session.db.parentNode
-	}));
-	*/
 }
 
 
+function move(req, res) {
+	var session = sessions[req.body.session];
+	session.move(req, res);
+}
+
+function addNode(req, res) {
+	var session = sessions[req.session];
+	session.addNode(req, res);
+}
+
+function deleteNode(req, res) {
+	var session = sessions[req.session];
+	session.deleteNode(req, res);
+}
+
+function renameNode(req, res) {
+	var session = sessions[req.session];
+	session.renameNode(req, res);
+}
+
+function apply(req, res) {
+	var session = sessions[req.session];
+	session.apply(req, res);
+}
+
+function reset(req, res) {
+	var session = sessions[req.session];
+	session.reset(req, res);
+}
 
 module.exports = {
-	getSession: getSession
+	getSession: getSession,
+	move: move,
+	add: addNode,
+	delete: deleteNode,
+	rename: renameNode,
+	apply: apply,
+	reset: reset
 }
 
 
 
 
-
-function defaultTree(parent) {
-	var n1 = new Node("node1");
-	var n2 = new Node("node2");
-	var n3 = new Node("node3");
-	var n4 = new Node("node4");
-	var n5 = new Node("node5");
-	var n6 = new Node("node6");
-	var n7 = new Node("node7");
-	var n8 = new Node("node8");
-	var n9 = new Node("node9");
-	var n10 = new Node("node10");
-	var n11 = new Node("node11");
-	var n12 = new Node("node12");
-	var n13 = new Node("node13");
-	var n14 = new Node("node14");
-	var n15 = new Node("node15");
-	var n16 = new Node("node16");
-	var n17 = new Node("node17");
-	var n18 = new Node("node18");
-	var n19 = new Node("node19");
+function defaultTree(parent, db) {
+	var n1 = new Node("node1", db);
+	var n2 = new Node("node2", db);
+	var n3 = new Node("node3", db);
+	var n4 = new Node("node4", db);
+	var n5 = new Node("node5", db);
+	var n6 = new Node("node6", db);
+	var n7 = new Node("node7", db);
+	var n8 = new Node("node8", db);
+	var n9 = new Node("node9", db);
+	var n10 = new Node("node10", db);
+	var n11 = new Node("node11", db);
+	var n12 = new Node("node12", db);
+	var n13 = new Node("node13", db);
+	var n14 = new Node("node14", db);
+	var n15 = new Node("node15", db);
+	var n16 = new Node("node16", db);
+	var n17 = new Node("node17", db);
+	var n18 = new Node("node18", db);
+	var n19 = new Node("node19", db);
 	parent.addBranch(n1);
 	parent.addBranch(n2);
 	parent.addBranch(n3);

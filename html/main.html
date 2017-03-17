@@ -9,6 +9,7 @@
 </head>
 <body>
   <div class="main">
+    <div class="header"> Древовидная база данных с кэшем </div>
 
     <div class="TreeContainer left" >
       <ul class="tree">
@@ -35,19 +36,32 @@
     var tree;
     var cash;
 
-    function add() {
+    function move() {
+      var arr = [];
+      $('.right ul.tree li a.selected').each(function () { arr.push($(this).parent("li").attr('id')) })
+      arr = arr.map(id => array.find(node => node.id==id));
+      var message = {
+          session: session,
+          nodes: arr
+      };
       $.ajax({
-        type: "get",
-        url: '/test',
-        success: function(message){
-          alert(message);
+        type: "POST",
+        dataType: 'json',
+        url: '/move',
+        data: message,
+        success: function(res){
+          clear(".left");
+          cash = res.nodesCash;
+          drawAll(cash, ".left");
         }
       });
     };
 
-    function drawNode(node) {
+    function drawNode(node, side) {
+      // side == ".left" or ".right"
+
       if (node.parent) {
-        var ctrl = $("#" + node.parent);
+        var ctrl = $(side).find("#" + node.parent);
         if (ctrl.length) {
           if (ctrl.children("ul").length) {
             var nodeStr = "<li id=" + node.id +">";
@@ -60,29 +74,39 @@
             node.value + '</a>' + '</li> </ul>';
             ctrl.append(nodeStr);
           }
-        }
+        } 
       } else {
         var nodeStr = "<li id=" + node.id +">";
         nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
         node.value + '</a>' + '</li>';
-        $(".right ul.tree").append(nodeStr);
+        $(side +" ul.tree").append(nodeStr);
+      }
+
+      if (node.branches && node.branches.length) {
+        node.branches.forEach(n => {
+          drawNode(n, side);
+        })
       }
     }
 
-    function drawTree(tree){
-      if (tree.branches.length) {
-        tree.branches.forEach(node => {
-          drawNode(node);
-        });
-        tree.branches.forEach(node => {
-          drawTree(node);
-        });
-      }
+    function drawAll(arr, side) {
+      if (!arr) return;
+      arr.forEach(node => {
+        drawNode(node, side);
+      })
+    }
+
+    function clear(side) {
+      $(side + " .tree li").each(function(){$(this).remove()})
     }
 
     function NodeSelection(ctrl) {
-      $('ul.tree li').find('a').each(function () { $(this).removeClass(); })
-      $(ctrl).addClass("selected");
+      //$('ul.tree li').find('a').each(function () { $(this).removeClass(); })
+      if ($(ctrl).hasClass("selected")) {
+        $(ctrl).removeClass();
+      } else {
+        $(ctrl).addClass("selected");
+      }
     }
 
     $(document).ready(function () {
@@ -94,16 +118,16 @@
         success: function(res){
           session = res.id;
           tree = res.tree;
-          drawNode(tree);
-          drawTree(tree);
+          array = res.array;
+          drawNode(tree, ".right");
         }
       });
 
-      $('ul.tree li a').click(function (e) {
+      /*$('ul.tree li a').click(function (e) {
         $('ul.tree li').find('a').each(function () { $(this).removeClass(); })
 
-        $(this).addClass("selected");
-      });
+        $(this).addClass("selected"); 
+      });*/
     });
   </script>
 </body>

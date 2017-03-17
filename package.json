@@ -18,6 +18,7 @@
   "homepage": "https://github.com/larsan12/heroku#readme",
   "dependencies": {
     "express": "^4.11.0",
-    "random-id": "*"
+    "random-id": "*",
+    "body-parser": "*"
   }
 }
