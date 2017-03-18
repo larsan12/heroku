@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="main">
-    <div class="header"> Древовидная база данных с кэшем </div>
+    <div class="header"> task </div>
 
     <div class="TreeContainer left" >
       <ul class="tree">
@@ -24,119 +24,13 @@
     </div>
 
     <input id="add" onclick="add()" type="button" value="+">
-    <input id="delete" onclick="delete()" type="button" value="-">
+    <input id="delete" onclick="deleteElement()" type="button" value="-">
     <input id="rename" onclick="rename()" type="button" value="a">
-    <input id="apply" onclick="apply()" type="button" value="apply">
+    <input id="apply" onclick="applyChanges()" type="button" value="apply">
     <input id="reset" onclick="reset()" type="button" value="reset">
   </div>
   
 
-  <script type="text/javascript">
-    var session;
-    var tree;
-    var cash;
-
-    function move() {
-      var arr = [];
-      $('.right ul.tree li a.selected').each(function () { arr.push($(this).parent("li").attr('id')) })
-      arr = arr.map(id => array.find(node => node.id==id));
-      var message = {
-          session: session,
-          nodes: arr
-      };
-      $.ajax({
-        type: "POST",
-        dataType: 'json',
-        url: '/move',
-        data: message,
-        success: function(res){
-          clear(".left");
-          cash = res.nodesCash;
-          cash.forEach(n=> lockNode(n.id));
-          drawAll(cash, ".left");
-        }
-      });
-    };
-
-    function drawNode(node, side) {
-      // side == ".left" or ".right"
-
-      if (node.parent) {
-        var ctrl = $(side).find("#" + node.parent);
-        if (ctrl.length) {
-          if (ctrl.children("ul").length) {
-            var nodeStr = "<li id=" + node.id +">";
-            nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
-            node.value + '</a>' + '</li>';
-            ctrl.children("ul").append(nodeStr);
-          } else {
-            var nodeStr = "<ul> <li id=" + node.id +">";
-            nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
-            node.value + '</a>' + '</li> </ul>';
-            ctrl.append(nodeStr);
-          }
-        } 
-      } else {
-        var nodeStr = "<li id=" + node.id +">";
-        nodeStr += '<a style="margin-left:3px;" onclick="NodeSelection(this);">'+ 
-        node.value + '</a>' + '</li>';
-        $(side +" ul.tree").append(nodeStr);
-      }
-
-      if (node.branches && node.branches.length) {
-        node.branches.forEach(n => {
-          drawNode(n, side);
-        })
-      }
-    }
-
-    function drawAll(arr, side) {
-      if (!arr) return;
-      arr.forEach(node => {
-        drawNode(node, side);
-      })
-    }
-
-    function clear(side) {
-      $(side + " .tree li").each(function(){$(this).remove()})
-    }
-
-    function NodeSelection(ctrl) {
-      //$('ul.tree li').find('a').each(function () { $(this).removeClass(); })
-      if ($(ctrl).hasClass("selected")) {
-        $(ctrl).removeClass();
-      } else {
-        $(ctrl).addClass("selected");
-      }
-    }
-
-    function lockNode(id) {
-      var ctrl = $(".right " + "#" + id + " a").first();
-      $(ctrl).removeClass();
-      $(ctrl).addClass("locked");
-      $(ctrl).attr('onclick','').unbind('click');
-    }
-
-    $(document).ready(function () {
-
-      $.ajax({
-        type: "get",
-        dataType: 'json',
-        url: '/session',
-        success: function(res){
-          session = res.id;
-          tree = res.tree;
-          array = res.array;
-          drawNode(tree, ".right");
-        }
-      });
-
-      /*$('ul.tree li a').click(function (e) {
-        $('ul.tree li').find('a').each(function () { $(this).removeClass(); })
-
-        $(this).addClass("selected"); 
-      });*/
-    });
-  </script>
+  <script type="text/javascript" src="/logic"> </script>
 </body>
 </html>
