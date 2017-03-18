@@ -27,8 +27,13 @@ var cashDeleted;
 
     function rename() {
       var id =$('.left ul.tree li a.selected').parent("li").attr('id');
+      if (!id) {
+        alert("выберите узел")
+        return;
+      };
       var name = $('.left ul.tree li a.selected').text();
       var value = prompt("введиде новое значение value: " + name, "");
+      if (!value) return;
       $.ajax({
         type: "POST",
         dataType: 'json',
@@ -46,7 +51,10 @@ var cashDeleted;
 
     function deleteElement() {
       var id =$('.left ul.tree li a.selected').parent("li").attr('id');
-      if (!id) return;
+      if (!id) {
+        alert("выберите узел")
+        return;
+      };
       $.ajax({
         type: "POST",
         dataType: 'json',
@@ -71,6 +79,7 @@ var cashDeleted;
       };
       var name = $('.left ul.tree li a.selected').text();
       var value = prompt("введиде значение value для нового узла (родиель: " + name + ") ", "");
+      if (!value) return;
       $.ajax({
         type: "POST",
         dataType: 'json',
