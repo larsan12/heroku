@@ -38,7 +38,7 @@ class Db {
 			cash.recursionDelete(n.id)
 		});
 		//delete
-		cash.array = cash.array.filter(n => !n.deleted);
+		//cash.array = cash.array.filter(n => !n.deleted);
 
 		cash.array.map(n => {
 			n._parent = n._parent || n.parent;

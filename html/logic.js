@@ -158,7 +158,7 @@ var cashDeleted;
       }
 
       if (node.deleted) {
-        deleteNode(node.id);
+        deleteNode(node.id, side);
       }
 
       if (node.branches && node.branches.length) {
@@ -204,8 +204,8 @@ var cashDeleted;
       $(ctrl).attr('onclick','').unbind('click');
     }
 
-    function deleteNode(id) {
-      var ctrl = $(".left " + "#" + id + " a").first();
+    function deleteNode(id, side) {
+      var ctrl = $(side + " #" + id + " a").first();
       $(ctrl).removeClass();
       $(ctrl).addClass("deleted");
       $(ctrl).attr('onclick','').unbind('click');
