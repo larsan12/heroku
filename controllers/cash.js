@@ -63,6 +63,7 @@ class Cash {
 				this.array.push(node);
 			}
 		});
+		
 		this.checkDependencies();
 		this.sortNodes();
 	};

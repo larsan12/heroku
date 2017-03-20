@@ -106,7 +106,6 @@ var cashDeleted;
         success: function(res){
           tree = res.tree;
           array = res.array;
-          clear(".left");
           clear(".right");
           drawNode(tree, ".right");
         }
@@ -155,6 +154,10 @@ var cashDeleted;
         nodeStr += '<a style="margin-left:3px;" onclick="'+func+';">'+ 
         node.value + '</a>' + '</li>';
         $(side +" ul.tree").append(nodeStr);
+      }
+
+      if (node.locked) {
+        lockNode(node.id);
       }
 
       if (node.deleted) {

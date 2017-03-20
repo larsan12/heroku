@@ -29,6 +29,11 @@ class Db {
 	}
 
 	applyChanges(cash) {
+		var arrayCashCopy = JSON.parse(JSON.stringify(cash.array));
+		var nodesCashCopy = JSON.parse(JSON.stringify(cash.nodes));
+
+
+		cash.array.forEach(n => n.locked = true);
 		cash.addNodes(this.array);
 		cash.array.map(n => {
 			n.parent = n._parent || n.parent;
@@ -64,8 +69,8 @@ class Db {
 
 			arrayCopy.forEach(n => delete n._parent);
 			this.array = arrayCopy;
-			cash.nodes = [];
-			cash.array = [];
+			cash.nodes = nodesCashCopy;
+			cash.array = arrayCashCopy;
 		}
 
 		//TODO save object's relations in db
