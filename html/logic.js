@@ -107,8 +107,10 @@ var cashDeleted;
           tree = res.tree;
           array = res.array;
           clear(".right");
+          clear(".left");
           drawNode(tree, ".right");
-        }
+          cash = res.nodesCash;
+          drawAll(cash, ".left");        }
       });
     };
 

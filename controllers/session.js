@@ -54,7 +54,8 @@ class Session {
 		res.json({
 			id: this.id,
 			tree: this.db.parentNode,
-			array: copyArray
+			array: copyArray,
+			nodesCash: this.cash.nodes
 		});
 	};
 }

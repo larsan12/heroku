@@ -29,9 +29,7 @@ class Db {
 	}
 
 	applyChanges(cash) {
-		var arrayCashCopy = JSON.parse(JSON.stringify(cash.array));
-		var nodesCashCopy = JSON.parse(JSON.stringify(cash.nodes));
-
+		var arrayCashCopy = JSON.parse(JSON.stringify(cash.array)); 
 
 		cash.array.forEach(n => n.locked = true);
 		cash.addNodes(this.array);
@@ -52,6 +50,14 @@ class Db {
 			return n;
 		});
 
+		//удаляем в кэше необходимые элементы
+		cash.array.filter(n => n.deleted).forEach(n => {
+			var node = arrayCashCopy.find(node => node.id == n.id);
+			if (node && !node.deleted) {
+				node.deleted = true;
+			}
+		})
+
 		cash.checkDependencies();
 		cash.sortNodes();
 		
@@ -69,8 +75,9 @@ class Db {
 
 			arrayCopy.forEach(n => delete n._parent);
 			this.array = arrayCopy;
-			cash.nodes = nodesCashCopy;
 			cash.array = arrayCashCopy;
+			cash.checkDependencies();
+			cash.sortNodes();
 		}
 
 		//TODO save object's relations in db
