@@ -42,17 +42,11 @@ function getSession(req, res) {
 	var session = new Session();
 	sessions[session.id]=session;
 	addTimer(session.id);
-	var copyArray = session.db.array.map(node => {
-		var copyNode = Object.assign({}, node);
-		delete copyNode.branches;
-		copyNode._parent = copyNode.parent;
-		delete copyNode.parent;
-		return copyNode;
-	});
+
 	res.json({
 		id: session.id,
-		tree: session.db.parentNode,
-		array: copyArray
+		tree: session.db.getCopyTree(),
+		array: session.db.getCopyArray()
 	});
 }
 

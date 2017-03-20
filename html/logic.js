@@ -4,12 +4,10 @@ var cash;
 var cashDeleted;
 
     function move() {
-      var arr = [];
-      $('.right ul.tree li a.selected').each(function () { arr.push($(this).parent("li").attr('id')) })
-      arr = arr.map(id => array.find(node => node.id==id));
+      var node = $('.right ul.tree li a.selected').parent("li").attr('id');
       var message = {
           session: session,
-          nodes: arr
+          node: node
       };
       $.ajax({
         type: "POST",
@@ -19,7 +17,7 @@ var cashDeleted;
         success: function(res){
           clear(".left");
           cash = res.nodesCash;
-          arr.forEach(n=> lockNode(n.id));
+          lockNode(node);
           drawAll(cash, ".left");
         }
       });
@@ -135,8 +133,8 @@ var cashDeleted;
 
     function drawNode(node, side) {
       // side == ".left" or ".right"
-      var func = side == ".right" ? "NodeSelection(this)" : "NodeSelectionLeft(this)";
-      if (node.parent) {
+      var func = "NodeSelection(this,'"+side+"')";
+      if (node.parent && $(side).find("#" + node.parent).length) {
         var ctrl = $(side).find("#" + node.parent);
         if (ctrl.length) {
           if (ctrl.children("ul").length) {
@@ -184,7 +182,7 @@ var cashDeleted;
       $(side + " .tree li").each(function(){$(this).remove()})
     }
 
-    function NodeSelection(ctrl) {
+    /*function NodeSelection(ctrl) {
       //$('ul.tree li').find('a').each(function () { $(this).removeClass(); })
       if ($(ctrl).hasClass("selected")) {
         $(ctrl).removeClass();
@@ -192,12 +190,12 @@ var cashDeleted;
         $(ctrl).addClass("selected");
       }
     }
-
-    function NodeSelectionLeft(ctrl) {
+*/
+    function NodeSelection(ctrl, side) {
       if ($(ctrl).hasClass("selected")) {
         $(ctrl).removeClass();
       } else {
-        $('.left ul.tree li .selected').each(function () { $(this).removeClass(); })
+        $(side + ' ul.tree li .selected').each(function () { $(this).removeClass(); })
         $(ctrl).addClass("selected");
       }
     }

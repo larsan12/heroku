@@ -11,6 +11,7 @@ var randomID = require("random-id");
 			branches: array of Obj, потомки
 			parent: Obj, родитель
 			id: string, вспомогательный уникальный в пределах БД id
+			locked: true - если элемент находится в кэше
 		}
 **/
 
@@ -130,9 +131,8 @@ class Db {
 		})(this, seniorNode);
 	}
 
-	move(id, cash) {
-		var node = this.setSortId(id);
-		var copy = {
+	getCopyOfNode(node) {
+		return {
 			id: node.id,
 			value: node.value,
 			parent: node.parent ? node.parent.id : undefined,
@@ -141,7 +141,36 @@ class Db {
 			numberOfChildren: node.numberOfChildren,
 			sortId: node.sortId
 		}
+	}
 
+	getCopyArray() {
+		var arr = [];
+		this.array.forEach(node => arr.push(this.getCopyOfNode(node)));
+		return arr;
+	}
+
+	getCopyTree() {
+		//delete circular structure
+		this.array.forEach(n => n.parent ? n.parent = n.parent.id : null);
+		var treeCopy = JSON.parse(JSON.stringify(this.parentNode));
+		this.recursionSetParent(this.parentNode);
+		return treeCopy;
+	}
+
+	recursionSetParent(node){
+		if (node.branches.length){
+			node.branches.forEach(n => {
+				n.parent = node;
+				this.recursionSetParent(n);
+			})
+		}
+	}
+
+	move(id, cash) {
+		var node = this.setSortId(id);
+		if (!node) return;
+		var copy = this.getCopyOfNode(node);
+		node.locked = true;
 		cash.addNode(copy);
 	}
 
@@ -154,7 +183,8 @@ class Db {
 
 	setSortId(id) {
 		var node = this.getNode(id);
-
+		if (this.cashNodes.has(node) && !node)
+			return;
 		var iterator = this.iterator();
 		var found = false;
 		var prevNode;
@@ -169,16 +199,14 @@ class Db {
 				else 
 					prevNode = iteratorNode;
 			}
-
-		} while (iteratorNode || !nextNode)
+		} while (iteratorNode && !nextNode)
 
 		if (prevNode && nextNode){
-			node.sortId = parseInt((nextNode - prevNode)/2) + prevNode.sortId;
-		}
-		else if (!prevNode && !nextNode){
+			node.sortId = parseInt((nextNode.sortId - prevNode.sortId)/2) + prevNode.sortId;
+		} else if (!prevNode && !nextNode){
 			node.sortId = Math.pow(2, 52)
 		} else if (!prevNode) {
-			node.sortId = parseInt(nextNode/2)
+			node.sortId = parseInt(nextNode.sortId/2)
 		} else {
 			node.sortId = parseInt((Math.pow(2,53)-prevNode.sortId)/2) + prevNode.sortId;
 		}

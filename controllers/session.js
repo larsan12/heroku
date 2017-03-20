@@ -14,8 +14,8 @@ class Session {
 	}
 
 	move(req, res) {
-		if (req.body.nodes && req.body.nodes.length) {
-			this.cash.addNodes(req.body.nodes);
+		if (req.body.node) {
+			this.db.move(req.body.node, this.cash);
 		};
 		res.json({nodesCash:this.cash.nodes});
 	};
@@ -144,6 +144,25 @@ function testDbIteratorForAllChilds() {
 
 testDbIteratorForAllChilds();
 
-*/
 
+function testDbSortId() {
+	var session = new Session();
+	var node7 = session.db.getNodeByValue("node7");
+	var node9 = session.db.getNodeByValue("node9");
+	var node10 = session.db.getNodeByValue("node10");
+	var node8 = session.db.getNodeByValue("node8");
+
+	session.db.move(node8.id, session.cash);
+	session.db.move(node10.id, session.cash);
+	session.db.move(node9.id, session.cash);
+	session.db.move(node7.id, session.cash);
+
+	console.log(node7.sortId);
+	console.log(node9.sortId);
+	console.log(node10.sortId);
+	console.log(node8.sortId);
+}
+
+testDbSortId();
+*/
 module.exports = Session;
