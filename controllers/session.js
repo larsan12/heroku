@@ -60,6 +60,7 @@ class Session {
 	};
 }
 
+
 function defaultTree(parent, db) {
 	var n1 = new Node("node1", db);
 	var n2 = new Node("node2", db);
@@ -100,5 +101,49 @@ function defaultTree(parent, db) {
 	n15.addBranch(n18);
 	n15.addBranch(n19);
 }
+
+/*
+function testDbIterator() {
+	var session = new Session();
+	var iterator = session.db.iterator();
+	var nextNode;
+	do {
+		nextNode = iterator.next();
+		var copy = Object.assign({}, nextNode);
+		delete copy.parent;
+		delete copy.branches;
+		console.log(copy);
+	} while (nextNode.value != "node11")
+	
+	var iterator2 = session.db.iterator();
+	var nextNode2;
+	do {
+		nextNode2 = iterator2.next();
+		var copy = Object.assign({}, nextNode2);
+		delete copy.parent;
+		delete copy.branches;
+		console.log(copy);
+	} while (nextNode2)
+}
+
+testDbIterator();
+
+
+function testDbIteratorForAllChilds() {
+	var session = new Session();
+	var iterator = session.db.iteratorForAllChilds(session.db.getNodeByValue("node7"));
+	var nextNode;
+	do {
+		nextNode = iterator.next();
+		var copy = Object.assign({}, nextNode);
+		delete copy.parent;
+		delete copy.branches;
+		console.log(copy);
+	} while (nextNode)
+}
+
+testDbIteratorForAllChilds();
+
+*/
 
 module.exports = Session;

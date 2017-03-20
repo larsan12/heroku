@@ -1,8 +1,23 @@
 "use strict"
 
+/**
+		Object specification:
+		Node in cash.array {
+			value: string
+			index: number, порядковый номер в ветке родителя
+			level: number, уровень вложенности
+			branches: array of Obj, потомки
+			parent: parent.id, id родителя
+			id: string, вспомогательный уникальный в пределах БД id
+		}
+**/
+
+
 class Cash {
 	constructor() {
+		//список всех объектов
 		this.array = [];
+		// список объектов первого столбца (для которых нет родителя)
 		this.nodes = []
 	}
 
