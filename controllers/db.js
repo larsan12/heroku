@@ -6,7 +6,6 @@ var randomID = require("random-id");
 		Node in db.array {
 			value: string
 			index: number, порядковый номер в ветке родителя
-			level: number, уровень вложенности
 			numberOfChildren: number, колличество потомков
 			branches: array of Obj, потомки
 			parent: Obj, родитель
@@ -25,7 +24,6 @@ class Node {
 		db.array.push(this);
 		this.index = 0;
 		this.numberOfChildren = 0;
-		this.level = 0;
 		//TODO уникальный id ораничивает размер ДБ до максимального значения number, можно заменить на random
 		this.id = ++db.quantityNodes;
 		//this.id = randomID(20,"aA0");
@@ -34,7 +32,6 @@ class Node {
 	addBranch(node) {
 		this.branches.push(node);
 		node.parent = this;
-		node.level = this.level + 1;
 		//index - порядковый номер в ветке родителя, для сортировки
 		node.index = ++this.numberOfChildren;
 	}
@@ -137,7 +134,6 @@ class Db {
 			value: node.value,
 			parent: node.parent ? node.parent.id : undefined,
 			index: node.index,
-			level: node.level,
 			numberOfChildren: node.numberOfChildren,
 			sortId: node.sortId
 		}
