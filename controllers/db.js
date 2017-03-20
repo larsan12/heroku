@@ -11,6 +11,7 @@ var randomID = require("random-id");
 			parent: Obj, родитель
 			id: string, вспомогательный уникальный в пределах БД id
 			locked: true - если элемент находится в кэше
+			sortId: number - для сортировки в условиях неопределённых связей
 		}
 **/
 
@@ -98,36 +99,6 @@ class Db {
 		})(this);
 	}
 
-	//возвращяет всю иерархию текущего узла, включая сам узел
-	iteratorForAllChilds(seniorNode) {
-		return new (function (db, seniorNode) {
-			this.seniorNode = seniorNode;
-			this.current;
-			
-			this.next = function() {
-				if (!this.current) {
-					this.current = this.seniorNode;
-					return this.current;
-				}
-
-				if (this.current.branches.length) {
-					this.current = this.current.branches[0];
-					return this.current;
-				} else {
-					var wanted;
-					do {
-						wanted = this.current.parent.nextChild(this.current.index);
-						if (this.current.parent == this.seniorNode && !wanted) return;
-						this.current = this.current.parent;
-					} while (!wanted)
-					this.current = wanted;
-					return wanted;
-				}
-			}
-
-		})(this, seniorNode);
-	}
-
 	getCopyOfNode(node) {
 		return {
 			id: node.id,
@@ -210,6 +181,50 @@ class Db {
 		this.cashNodes.add(node);
 
 		return node;
+	}
+
+	applyChanges(cash) {
+		cash.nodes.forEach(n => this.recursionCheckChanges(n));
+		this.recursionDelete(this.parentNode);
+		cash.nodes.forEach(n => this.recursionCheckDeletedInCash(n));
+	}
+
+	recursionCheckChanges(node) {
+		if (node.created) {
+			var parent = this.getNode(node.parent);
+			var newNode = new Node(node.value, this);
+			parent.addBranch(newNode);
+			node.id = newNode.id;
+			node.index = newNode.index;
+			newNode.locked = true;
+			node.branches.forEach(n => n.parent = node.id);
+			delete node.created;
+		}
+
+		if (node.renamed) {
+			this.getNode(node.id).value = node.value;
+			delete node.renamed;
+		}
+
+		if (node.deleted) {
+			this.getNode(node.id).deleted = true;
+		}
+
+		node.branches.forEach(n => this.recursionCheckChanges(n));
+	}
+
+	//на тот случай, если в БД удаляться новые элементы иерархии
+	recursionCheckDeletedInCash(node) {
+		var dbNode = this.getNode(node.id);
+		if (dbNode.deleted && !node.deleted) node.deleted = true;
+		node.branches.forEach(n => this.recursionCheckDeletedInCash(n));
+	}
+
+	recursionDelete(node, deleted) {
+		node.branches.forEach(n => {
+			if (deleted || node.deleted) n.deleted = true;
+			this.recursionDelete(n, deleted || n.deleted)
+		})
 	}
 }
 

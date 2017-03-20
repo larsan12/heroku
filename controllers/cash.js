@@ -1,5 +1,5 @@
 "use strict"
-
+var randomID = require("random-id");
 /**
 		Object specification:
 		Node in cash.array {
@@ -9,6 +9,9 @@
 			parent: parent.id, id родителя
 			id: string, вспомогательный уникальный в пределах БД id
 			connection: true, присутствует ли родитель в кэше
+			deleted: true, если удален
+			created: true, если создан
+			renamed: true, если переименован
 		}
 **/
 
@@ -24,12 +27,6 @@ class Cash {
 	getNode(id) {
 		return this.array.find(n => n.id == id);
 	}
-/*
-	recursionDelete(id) {
-		this.array.find(n => n.id == id).deleted = true;
-		this.array.filter(n => n.parent == id).forEach(n => this.recursionDelete(n.id));
-	}
-*/
 
 	checkDependencies(node) {
 		if (this.array.find(n => n.id == node.id)) return;
@@ -48,6 +45,9 @@ class Cash {
 		});
 		this.array.push(node);
 		this.nodes = this.array.filter(n => !n.connection);
+		this.nodes.forEach(n => this.recursionDelete(n));
+		this.sortNodes();
+
 	}
 
 	sortBranches(node) {
@@ -56,15 +56,42 @@ class Cash {
 		})
 	}
 
+	sortNodes() {
+		this.nodes.sort(function(a, b) {
+			return a.sortId - b.sortId;
+		})
+	}
+
 	addNode(node) {
 		this.checkDependencies(node);
 	};
 
-	sortNodes() {
+	deleteNode(id) {
+		var node = this.getNode(id)
+		node.deleted = true;
+		this.recursionDelete(node, true);
+	}
+
+	recursionDelete(node, deleted) {
+		node.branches.forEach(n => {
+			if (deleted || node.deleted) n.deleted = true;
+			this.recursionDelete(n, deleted || n.deleted)
+		})
 	}
 
 	createNode(value, parent) {
-
+		var nodeParent = this.getNode(parent);
+		var node = {
+			value: value,
+			branches: [],
+			index: ++nodeParent.numberOfChildren,
+			parent: parent,
+			id: randomID(20,"aA0"),
+			numberOfChildren: 0,
+			created: true
+		};
+		this.addNode(node);
+		return node;
 	}
 }
 

@@ -44,17 +44,10 @@ class Session {
 
 	applyChanges(req, res) {
 		this.db.applyChanges(this.cash);
-		var copyArray = this.db.array.map(node => {
-			var copyNode = Object.assign({}, node);
-			delete copyNode.branches;
-			copyNode._parent = copyNode.parent;
-			delete copyNode.parent;
-			return copyNode;
-		});
 		res.json({
 			id: this.id,
-			tree: this.db.parentNode,
-			array: copyArray,
+			tree: this.db.getCopyTree(),
+			array: this.db.getCopyArray(),
 			nodesCash: this.cash.nodes
 		});
 	};
@@ -101,6 +94,9 @@ function defaultTree(parent, db) {
 	n15.addBranch(n18);
 	n15.addBranch(n19);
 }
+
+
+//Fast tests
 
 /*
 function testDbIterator() {
