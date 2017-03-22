@@ -93,6 +93,7 @@ function defaultTree(parent, db) {
 	n15.addBranch(n17);
 	n15.addBranch(n18);
 	n15.addBranch(n19);
+	db.setSortId();
 }
 
 

@@ -134,19 +134,35 @@ class Db {
 	}
 
 	move(id, cash) {
-		var node = this.setSortId(id);
+		var node = this.getNode(id);
 		if (!node) return;
 		var copy = this.getCopyOfNode(node);
 		node.locked = true;
 		cash.addNode(copy);
 	}
 
+	/*
+		новый метод назначает абсолюто всем узлам порядковый номер, а не только перемещаемым
+		ограничивает размер БД до 2^53 узлов
+	*/
+	setSortId() {
+		var iterator = this.iterator();
+		var iteratorNode;
+		var sortId = 0;
+		do {
+			iteratorNode = iterator.next();
+			if (iteratorNode)
+				iteratorNode.sortId = ++sortId;
+		} while (iteratorNode)
+	}
+
+/*
 	/** Назначает полям id для сортировки так, чтобы кэш отображался максимально похоже с БД
 		id узла будет назначаться из диапазона от 0 до 2^53 = 9007199254740992, так чтобы 
 		расстояние до ее соседей или до границ диапазона было одинаковым, таким образом 
 		гарантируемое число элементов в кэше без коллизий в сортировке - 53, 
 		вероятное же колличество элементов без коллизий на порядок больше
-	**/
+	*
 
 	setSortId(id) {
 		var node = this.getNode(id);
@@ -182,7 +198,7 @@ class Db {
 
 		return node;
 	}
-
+*/
 	applyChanges(cash) {
 		cash.nodes.forEach(n => this.recursionCheckChanges(n));
 		this.recursionDelete(this.parentNode);
